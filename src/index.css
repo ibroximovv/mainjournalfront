@@ -119,3 +119,41 @@
   }
 }
 
+@font-face {
+  font-family: 'SourceSerif4';
+  src: url('./assets/fonts/Source_Serif_4/SourceSerif4-Regular.woff2') format('woff2'),
+       url('./assets/fonts/Source_Serif_4/SourceSerif4-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap; /* Tezroq matn ko‘rinishi uchun */
+}
+
+/* Italic */
+@font-face {
+  font-family: 'SourceSerif4';
+  src: url('./assets/fonts/Source_Serif_4/SourceSerif4-Italic.woff2') format('woff2'),
+       url('./assets/fonts/Source_Serif_4/SourceSerif4-Italic.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Bold */
+@font-face {
+  font-family: 'SourceSerif4';
+  src: url('./assets/fonts/Source_Serif_4/SourceSerif4-Bold.woff2') format('woff2'),
+       url('./assets/fonts/Source_Serif_4/SourceSerif4-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Bold Italic */
+@font-face {
+  font-family: 'SourceSerif4';
+  src: url('./assets/fonts/Source_Serif_4/SourceSerif4-BoldItalic.woff2') format('woff2'),
+       url('./assets/fonts/Source_Serif_4/SourceSerif4-BoldItalic.woff') format('woff');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}

@@ -6,12 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { 
-  FileText, 
-  Clock, 
-  CheckCircle2, 
-  XCircle, 
-  AlertCircle, 
+import {
+  FileText,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
   Sparkles,
   Calendar,
   MessageSquare,
@@ -83,6 +83,8 @@ const UserHome: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<string>('all');
 
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
   useEffect(() => {
     fetchArticles();
   }, []);
@@ -90,13 +92,32 @@ const UserHome: React.FC = () => {
   const fetchArticles = async (): Promise<void> => {
     try {
       setLoading(true);
-      const response = await fetch('https://backendjournal.ilyosbekibroximov.uz/api/article?page=1&limit=100&sortBy=createdAt&sortOrder=desc');
-      const data = await response.json();
-      
-      if (data.statusCode === 200) {
-        setArticles(data.data);
-        calculateStats(data.data);
+
+      const userRes = await fetch(
+        'https://backendjournal.ilyosbekibroximov.uz/api/user/me',
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const userData = await userRes.json();
+      // console.log("USER DATA:", userData,);
+
+      const articleRes = await fetch(
+        'https://backendjournal.ilyosbekibroximov.uz/api/article?page=1&limit=100&sortBy=createdAt&sortOrder=desc',
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const articleData = await articleRes.json();
+      // console.log("ARTICLE DATA:", articleData);
+
+      if (articleData.statusCode === 200) {
+        const filtered = articleData.data.filter(
+          (article: Article) => article.userId === userData.id
+        );
+
+        setArticles(filtered);
+        calculateStats(filtered);
       }
+
     } catch (error) {
       console.error('Error fetching articles:', error);
       setDemoData();
@@ -104,6 +125,7 @@ const UserHome: React.FC = () => {
       setLoading(false);
     }
   };
+
 
   const setDemoData = (): void => {
     const demoArticles: Article[] = [
@@ -262,7 +284,7 @@ const UserHome: React.FC = () => {
         timestamp: new Date()
       }]);
       setChatMessage('');
-      
+
       setTimeout(() => {
         setChatHistory(prev => [...prev, {
           type: 'admin',
@@ -318,8 +340,8 @@ const UserHome: React.FC = () => {
           ].map((stat, index) => {
             const IconComponent = stat.icon;
             return (
-              <Card 
-                key={index} 
+              <Card
+                key={index}
                 className="bg-white border-gray-200 hover:shadow-lg transition-all duration-300"
               >
                 <CardContent className="p-6">
@@ -343,32 +365,32 @@ const UserHome: React.FC = () => {
         {/* Articles Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white border border-gray-200 p-1.5 h-auto flex-wrap justify-start gap-2">
-            <TabsTrigger 
-              value="all" 
+            <TabsTrigger
+              value="all"
               className="data-[state=active]:bg-[#0f172a] data-[state=active]:text-white text-gray-600"
             >
               Hammasi
             </TabsTrigger>
-            <TabsTrigger 
-              value="PENDING" 
+            <TabsTrigger
+              value="PENDING"
               className="data-[state=active]:bg-amber-500 data-[state=active]:text-white text-gray-600"
             >
               Kutilmoqda
             </TabsTrigger>
-            <TabsTrigger 
-              value="ACCEPTED" 
+            <TabsTrigger
+              value="ACCEPTED"
               className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white text-gray-600"
             >
               Qabul qilindi
             </TabsTrigger>
-            <TabsTrigger 
-              value="REJECTED" 
+            <TabsTrigger
+              value="REJECTED"
               className="data-[state=active]:bg-rose-500 data-[state=active]:text-white text-gray-600"
             >
               Rad etildi
             </TabsTrigger>
-            <TabsTrigger 
-              value="PUBLISHED" 
+            <TabsTrigger
+              value="PUBLISHED"
               className="data-[state=active]:bg-blue-500 data-[state=active]:text-white text-gray-600"
             >
               Nashr etildi
@@ -389,9 +411,9 @@ const UserHome: React.FC = () => {
                 {filterArticles(activeTab).map((article) => {
                   const statusConfig = getStatusConfig(article.status);
                   const StatusIcon = statusConfig.icon;
-                  
+
                   return (
-                    <Card 
+                    <Card
                       key={article.id}
                       className="bg-white border-gray-200 hover:shadow-lg hover:border-gray-300 transition-all duration-300 cursor-pointer group"
                       onClick={() => handleArticleClick(article)}
@@ -432,8 +454,8 @@ const UserHome: React.FC = () => {
                             </div>
                           )}
                         </div>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           className="w-full text-gray-600 hover:text-[#0f172a] hover:bg-gray-50 border-gray-200"
                         >
                           <Eye className="w-4 h-4 mr-2" />
@@ -467,7 +489,7 @@ const UserHome: React.FC = () => {
               })()}
             </div>
           </DialogHeader>
-          
+
           <div className="flex-1 overflow-y-auto px-6 py-4">
             <div className="space-y-6">
               <div className="space-y-4">
@@ -479,7 +501,7 @@ const UserHome: React.FC = () => {
                   <h4 className="font-semibold text-sm text-gray-600 mb-2 uppercase tracking-wide">Abstrakt</h4>
                   <p className="text-gray-700 leading-relaxed">{selectedArticle?.abstract}</p>
                 </div>
-                
+
                 {selectedArticle?.issn && (
                   <div>
                     <h4 className="font-semibold text-sm text-gray-600 mb-2 uppercase tracking-wide">ISSN</h4>
@@ -497,37 +519,34 @@ const UserHome: React.FC = () => {
                       Muhokama
                     </h4>
                   </div>
-                  
+
                   <ScrollArea className="h-[300px] p-4">
                     <div className="space-y-3">
                       {chatHistory.map((msg, idx) => (
-                        <div 
+                        <div
                           key={idx}
                           className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                           <div className={`flex gap-2 max-w-[80%] ${msg.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                              msg.type === 'user' 
-                                ? 'bg-blue-600' 
-                                : msg.type === 'system'
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.type === 'user'
+                              ? 'bg-blue-600'
+                              : msg.type === 'system'
                                 ? 'bg-rose-600'
                                 : 'bg-emerald-600'
-                            }`}>
+                              }`}>
                               <User className="w-4 h-4 text-white" />
                             </div>
-                            <div 
-                              className={`rounded-lg p-3 ${
-                                msg.type === 'user' 
-                                  ? 'bg-blue-600 text-white' 
-                                  : msg.type === 'system'
+                            <div
+                              className={`rounded-lg p-3 ${msg.type === 'user'
+                                ? 'bg-blue-600 text-white'
+                                : msg.type === 'system'
                                   ? 'bg-rose-50 text-rose-800 border border-rose-200'
                                   : 'bg-white text-gray-800 border border-gray-200'
-                              }`}
+                                }`}
                             >
                               <p className="text-sm leading-relaxed">{msg.message}</p>
-                              <p className={`text-xs mt-2 ${
-                                msg.type === 'user' ? 'text-blue-100' : 'text-gray-500'
-                              }`}>
+                              <p className={`text-xs mt-2 ${msg.type === 'user' ? 'text-blue-100' : 'text-gray-500'
+                                }`}>
                                 {msg.timestamp.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
                               </p>
                             </div>
@@ -545,7 +564,7 @@ const UserHome: React.FC = () => {
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                       className="flex-1 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                     />
-                    <Button 
+                    <Button
                       onClick={handleSendMessage}
                       className="bg-blue-600 hover:bg-blue-700 text-white"
                     >

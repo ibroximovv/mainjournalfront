@@ -27,7 +27,7 @@ function App() {
   if (loading) return <SmoothLoader />;
 
   return (
-    <>
+    <div style={{ fontFamily: 'SourceSerif4, serif' }}>
       <Toaster richColors />
       {hasToken ? (
         <DashboardLayout />
@@ -40,7 +40,7 @@ function App() {
           </Routes>
         </HomeLayout>
       )}
-    </>
+    </div>
   );
 }
 

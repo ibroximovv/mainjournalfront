@@ -122,8 +122,9 @@ function DashboardContent() {
             </div>
 
             {/* center: breadcrumb */}
-            <div className="flex-1 px-4">
-              {generateBreadcrumbs()}
+            <div className="flex-1 text-gray-300 px-4">
+              {/* {generateBreadcrumbs()} */}
+              {location.pathname.split("/").reverse()[0]}
             </div>
 
             {/* right: notifications + avatar/logout */}

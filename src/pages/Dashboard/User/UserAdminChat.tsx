@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Search, CheckCheck, Check, Circle, Users, User, AlertCircle } from 'lucide-react';
+import { Send, Search, CheckCheck, Check, Circle, Users, User, AlertCircle, ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -129,17 +130,17 @@ const UserAdminChat = () => {
         const response = await fetch(`${API_BASE}/user/me`, {
           headers: getHeaders(),
         });
-        
+
         if (!response.ok) {
           throw new Error('Foydalanuvchi ma\'lumotlarini olishda xatolik');
         }
 
         const data = await response.json();
         console.log('Current user data:', data);
-        
+
         if (data.statusCode === 200 && data.data) {
           setCurrentUser(data.data);
-          
+
           // Join socket room
           if (socket && isConnected) {
             socket.emit('join_user', { userId: data.data.id });
@@ -148,7 +149,7 @@ const UserAdminChat = () => {
         } else if (data.id) {
           // API returns user directly without wrapper
           setCurrentUser(data);
-          
+
           if (socket && isConnected) {
             socket.emit('join_user', { userId: data.id });
             console.log('Joined user room:', data.id);
@@ -175,19 +176,19 @@ const UserAdminChat = () => {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         // Fetch all users first (except current user)
         const usersResponse = await fetch(`${API_BASE}/user`, {
           headers: getHeaders(),
         });
-        
+
         if (!usersResponse.ok) {
           throw new Error('Foydalanuvchilarni yuklashda xatolik');
         }
 
         const usersData = await usersResponse.json();
         console.log('Users data:', usersData);
-        
+
         if (usersData.statusCode === 200 && usersData.data) {
           const filteredUsersList = usersData.data.filter(
             (user: UserType) => user.id !== currentUser.id
@@ -210,11 +211,11 @@ const UserAdminChat = () => {
             `${API_BASE}/article-user-chat?page=1&limit=100&sortBy=createdAt&sortOrder=desc`,
             { headers: getHeaders() }
           );
-          
+
           if (chatsResponse.ok) {
             const chatsData = await chatsResponse.json();
             console.log('Chats data:', chatsData);
-            
+
             if (chatsData.statusCode === 200 && chatsData.data) {
               setChats(chatsData.data);
             } else if (Array.isArray(chatsData)) {
@@ -253,12 +254,12 @@ const UserAdminChat = () => {
         if (prev.some(m => m.id === message.id)) return prev;
         return [...prev, message];
       });
-      
+
       // Mark as read if chat is open
       if (selectedChat && message.fromId === selectedChat.id && message.toId === currentUser.id) {
-        socket.emit('mark_as_read', { 
-          messageId: message.id, 
-          toId: currentUser.id 
+        socket.emit('mark_as_read', {
+          messageId: message.id,
+          toId: currentUser.id
         });
       }
     });
@@ -274,7 +275,7 @@ const UserAdminChat = () => {
 
     socket.on('message_read', (message: MessageType) => {
       console.log('Message marked as read:', message);
-      setMessages(prev => 
+      setMessages(prev =>
         prev.map(msg => msg.id === message.id ? { ...msg, isRead: true } : msg)
       );
     });
@@ -303,7 +304,7 @@ const UserAdminChat = () => {
 
   // Filter messages for selected chat
   const currentChatMessages = messages.filter(
-    msg => 
+    msg =>
       (msg.fromId === currentUser?.id && msg.toId === selectedChat?.id) ||
       (msg.fromId === selectedChat?.id && msg.toId === currentUser?.id)
   );
@@ -311,7 +312,7 @@ const UserAdminChat = () => {
   // Handle chat selection
   const handleSelectChat = async (user: UserType) => {
     setSelectedChat(user);
-    
+
     // Create or get chat
     try {
       const response = await fetch(`${API_BASE}/article-user-chat`, {
@@ -374,7 +375,7 @@ const UserAdminChat = () => {
   // Get last message for user
   const getLastMessage = (userId: number) => {
     const userMessages = messages.filter(
-      msg => 
+      msg =>
         (msg.fromId === currentUser?.id && msg.toId === userId) ||
         (msg.fromId === userId && msg.toId === currentUser?.id)
     );
@@ -395,9 +396,9 @@ const UserAdminChat = () => {
   // Format time
   const formatTime = (date: string) => {
     try {
-      return new Date(date).toLocaleTimeString('uz-UZ', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      return new Date(date).toLocaleTimeString('uz-UZ', {
+        hour: '2-digit',
+        minute: '2-digit'
       });
     } catch {
       return '';
@@ -425,28 +426,28 @@ const UserAdminChat = () => {
   }
 
   return (
-    <div className="flex rounded-2xl max-h-[99%] h-screen overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="flex md:rounded-2xl max-h-screen h-[99%] rounded-2xl overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Sidebar - Users List */}
-      <div className="w-80 bg-white border-r border-slate-200 flex flex-col shadow-lg overflow-hidden">
+      <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} w-full md:w-80 bg-white border-r border-slate-200 flex-col shadow-lg overflow-hidden`}>
         {/* Header */}
-        <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-[#133654] to-blue-800 flex-shrink-0">
-          <div className="flex items-center gap-3 mb-3">
-            <Avatar className="h-12 w-12 border-2 border-white shadow-md">
+        <div className="p-3 md:p-4 border-b border-slate-200 bg-gradient-to-r from-[#133654] to-blue-800 flex-shrink-0">
+          <div className="flex items-center gap-2 md:gap-3 mb-3">
+            <Avatar className="h-10 w-10 md:h-12 md:w-12 border-2 border-white shadow-md">
               <AvatarImage src={currentUser?.image} />
-              <AvatarFallback className="bg-blue-500 text-white">
+              <AvatarFallback className="bg-blue-500 text-white text-sm">
                 {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1">
-              <h2 className="font-semibold text-white">
+            <div className="flex-1 min-w-0">
+              <h2 className="font-semibold text-white text-sm md:text-base truncate">
                 {currentUser?.firstName} {currentUser?.lastName}
               </h2>
-              <p className="text-xs text-blue-100">@{currentUser?.username}</p>
+              <p className="text-xs text-blue-100 truncate">@{currentUser?.username}</p>
             </div>
-            <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'} animate-pulse`} 
-                 title={isConnected ? 'Ulangan' : 'Ulanmagan'} />
+            <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'} animate-pulse flex-shrink-0`}
+              title={isConnected ? 'Ulangan' : 'Ulanmagan'} />
           </div>
-          
+
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -454,13 +455,13 @@ const UserAdminChat = () => {
               placeholder="Qidirish..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 bg-white/90 border-0 focus-visible:ring-2 focus-visible:ring-white/50"
+              className="pl-10 bg-white/90 border-0 focus-visible:ring-2 focus-visible:ring-white/50 text-sm"
             />
           </div>
         </div>
 
         {/* Users List */}
-        <ScrollArea className="flex-1 ">
+        <ScrollArea className="flex-1">
           <div className="p-2">
             {/* Admin Section */}
             {adminUsers.length > 0 && (
@@ -478,41 +479,40 @@ const UserAdminChat = () => {
                     <button
                       key={user.id}
                       onClick={() => handleSelectChat(user)}
-                      className={`w-full p-3 rounded-lg mb-1 transition-all duration-200 hover:bg-slate-50 ${
-                        selectedChat?.id === user.id 
-                          ? 'bg-blue-50 border border-blue-200 shadow-sm' 
-                          : 'hover:shadow-sm'
-                      }`}
+                      className={`w-full p-2 md:p-3 rounded-lg mb-1 transition-all duration-200 hover:bg-slate-50 ${selectedChat?.id === user.id
+                        ? 'bg-blue-50 border border-blue-200 shadow-sm'
+                        : 'hover:shadow-sm'
+                        }`}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="relative">
-                          <Avatar className="h-11 w-11">
+                      <div className="flex items-start gap-2 md:gap-3">
+                        <div className="relative flex-shrink-0">
+                          <Avatar className="h-10 w-10 md:h-11 md:w-11">
                             <AvatarImage src={user.image} />
-                            <AvatarFallback className="bg-gradient-to-br from-[#133654] to-blue-700 text-white">
+                            <AvatarFallback className="bg-gradient-to-br from-[#133654] to-blue-700 text-white text-sm">
                               {user.firstName[0]}{user.lastName[0]}
                             </AvatarFallback>
                           </Avatar>
                           {isOnline && (
-                            <Circle className="absolute bottom-0 right-0 h-3 w-3 fill-green-500 text-green-500 border-2 border-white rounded-full" />
+                            <Circle className="absolute bottom-0 right-0 h-2.5 w-2.5 md:h-3 md:w-3 fill-green-500 text-green-500 border-2 border-white rounded-full" />
                           )}
                         </div>
-                        <div className="flex-1 text-left overflow-hidden">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-medium text-sm text-slate-800 truncate">
+                        <div className="flex-1 text-left overflow-hidden min-w-0">
+                          <div className="flex items-center justify-between mb-1 gap-2">
+                            <span className="font-medium text-xs md:text-sm text-slate-800 truncate">
                               {user.firstName} {user.lastName}
                             </span>
                             {lastMsg && (
-                              <span className="text-xs text-slate-400 ml-2">
+                              <span className="text-xs text-slate-400 flex-shrink-0">
                                 {formatTime(lastMsg.createdAt)}
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between gap-2">
                             <p className="text-xs text-slate-500 truncate">
                               {lastMsg?.message || 'Xabar yo\'q'}
                             </p>
                             {unreadCount > 0 && (
-                              <Badge className="ml-2 h-5 min-w-[20px] bg-blue-500 hover:bg-blue-600 text-white text-xs">
+                              <Badge className="h-5 min-w-[20px] bg-blue-500 hover:bg-blue-600 text-white text-xs flex-shrink-0">
                                 {unreadCount}
                               </Badge>
                             )}
@@ -541,41 +541,40 @@ const UserAdminChat = () => {
                     <button
                       key={user.id}
                       onClick={() => handleSelectChat(user)}
-                      className={`w-full p-3 rounded-lg mb-1 transition-all duration-200 hover:bg-slate-50 ${
-                        selectedChat?.id === user.id 
-                          ? 'bg-blue-50 border border-blue-200 shadow-sm' 
-                          : 'hover:shadow-sm'
-                      }`}
+                      className={`w-full p-2 md:p-3 rounded-lg mb-1 transition-all duration-200 hover:bg-slate-50 ${selectedChat?.id === user.id
+                        ? 'bg-blue-50 border border-blue-200 shadow-sm'
+                        : 'hover:shadow-sm'
+                        }`}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="relative">
-                          <Avatar className="h-11 w-11">
+                      <div className="flex items-start gap-2 md:gap-3">
+                        <div className="relative flex-shrink-0">
+                          <Avatar className="h-10 w-10 md:h-11 md:w-11">
                             <AvatarImage src={user.image} />
-                            <AvatarFallback className="bg-gradient-to-br from-slate-400 to-slate-500 text-white">
+                            <AvatarFallback className="bg-gradient-to-br from-slate-400 to-slate-500 text-white text-sm">
                               {user.firstName[0]}{user.lastName[0]}
                             </AvatarFallback>
                           </Avatar>
                           {isOnline && (
-                            <Circle className="absolute bottom-0 right-0 h-3 w-3 fill-green-500 text-green-500 border-2 border-white rounded-full" />
+                            <Circle className="absolute bottom-0 right-0 h-2.5 w-2.5 md:h-3 md:w-3 fill-green-500 text-green-500 border-2 border-white rounded-full" />
                           )}
                         </div>
-                        <div className="flex-1 text-left overflow-hidden">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-medium text-sm text-slate-800 truncate">
+                        <div className="flex-1 text-left overflow-hidden min-w-0">
+                          <div className="flex items-center justify-between mb-1 gap-2">
+                            <span className="font-medium text-xs md:text-sm text-slate-800 truncate">
                               {user.firstName} {user.lastName}
                             </span>
                             {lastMsg && (
-                              <span className="text-xs text-slate-400 ml-2">
+                              <span className="text-xs text-slate-400 flex-shrink-0">
                                 {formatTime(lastMsg.createdAt)}
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between gap-2">
                             <p className="text-xs text-slate-500 truncate">
                               {lastMsg?.message || 'Xabar yo\'q'}
                             </p>
                             {unreadCount > 0 && (
-                              <Badge className="ml-2 h-5 min-w-[20px] bg-blue-500 hover:bg-blue-600 text-white text-xs">
+                              <Badge className="h-5 min-w-[20px] bg-blue-500 hover:bg-blue-600 text-white text-xs flex-shrink-0">
                                 {unreadCount}
                               </Badge>
                             )}
@@ -599,74 +598,82 @@ const UserAdminChat = () => {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className={`${selectedChat ? 'flex' : 'hidden md:flex'} flex-1 flex-col overflow-hidden`}>
         {selectedChat ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 bg-[#d1d6f5c2] border-b border-slate-200 shadow-sm flex-shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Avatar className="h-12 w-12">
+            <div className="p-3 md:p-4 bg-[#d1d6f5c2] border-b border-slate-200 shadow-sm flex-shrink-0">
+              <div className="flex items-center gap-2 md:gap-3">
+                {/* Back button for mobile */}
+                <button
+                  onClick={() => setSelectedChat(null)}
+                  className="md:hidden p-2 hover:bg-white/50 rounded-lg transition-colors flex-shrink-0 -ml-1"
+                  aria-label="Orqaga qaytish"
+                >
+                  <ArrowLeft className="w-5 h-5 text-slate-700" />
+                </button>
+
+                <div className="relative flex-shrink-0">
+                  <Avatar className="h-10 w-10 md:h-12 md:w-12">
                     <AvatarImage src={selectedChat.image} />
-                    <AvatarFallback className="bg-gradient-to-br from-[#133654] to-blue-600 text-white">
+                    <AvatarFallback className="bg-gradient-to-br from-[#133654] to-blue-600 text-white text-sm">
                       {selectedChat.firstName[0]}{selectedChat.lastName[0]}
                     </AvatarFallback>
                   </Avatar>
                   {onlineUsers.includes(selectedChat.id) && (
-                    <Circle className="absolute bottom-0 right-0 h-3 w-3 fill-green-500 text-green-500 border-2 border-white rounded-full" />
+                    <Circle className="absolute bottom-0 right-0 h-2.5 w-2.5 md:h-3 md:w-3 fill-green-500 text-green-500 border-2 border-white rounded-full" />
                   )}
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-slate-800">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-slate-800 text-sm md:text-base truncate">
                     {selectedChat.firstName} {selectedChat.lastName}
                   </h3>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-xs md:text-sm text-slate-500">
                     {onlineUsers.includes(selectedChat.id) ? 'Onlayn' : 'Oflayn'}
                   </p>
                 </div>
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs flex-shrink-0">
                   {selectedChat.role}
                 </Badge>
               </div>
             </div>
 
             {/* Messages */}
-            <ScrollArea className="flex-1 overflow-y-auto p-4 bg-[linear-gradient(to_top,#f3e7e9_0%,#e3eeff_99%,#e3eeff_100%)]" ref={scrollAreaRef}>
-              <div className="space-y-4">
+            <ScrollArea className="flex-1 overflow-y-auto p-3 md:p-4 bg-[linear-gradient(to_top,#f3e7e9_0%,#e3eeff_99%,#e3eeff_100%)]" ref={scrollAreaRef}>
+              <div className="space-y-3 md:space-y-4">
                 {currentChatMessages.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-slate-400">Xabarlar yo'q</p>
-                    <p className="text-slate-400 text-sm mt-1">Birinchi xabarni yuboring</p>
+                    <p className="text-slate-400 text-sm">Xabarlar yo'q</p>
+                    <p className="text-slate-400 text-xs md:text-sm mt-1">Birinchi xabarni yuboring</p>
                   </div>
                 ) : (
                   currentChatMessages.map((msg, index) => {
                     const isOwn = msg.fromId === currentUser?.id;
-                    const showAvatar = index === 0 || 
+                    const showAvatar = index === 0 ||
                       currentChatMessages[index - 1].fromId !== msg.fromId;
 
                     return (
                       <div
                         key={msg.id}
-                        className={`flex items-end gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'} animate-in slide-in-from-bottom-2 duration-300`}
+                        className={`flex items-end gap-1.5 md:gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'} animate-in slide-in-from-bottom-2 duration-300`}
                       >
                         {!isOwn && (
-                          <Avatar className={`h-8 w-8 ${showAvatar ? 'opacity-100' : 'opacity-0'}`}>
+                          <Avatar className={`h-7 w-7 md:h-8 md:w-8 flex-shrink-0 ${showAvatar ? 'opacity-100' : 'opacity-0'}`}>
                             <AvatarImage src={selectedChat.image} />
                             <AvatarFallback className="bg-gradient-to-br from-slate-400 to-slate-500 text-white text-xs">
                               {selectedChat.firstName[0]}{selectedChat.lastName[0]}
                             </AvatarFallback>
                           </Avatar>
                         )}
-                        
-                        <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} max-w-[70%]`}>
+
+                        <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} max-w-[85%] md:max-w-[70%]`}>
                           <div
-                            className={`px-4 py-2 rounded-2xl shadow-sm ${
-                              isOwn
-                                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-sm'
-                                : 'bg-white text-slate-800 rounded-bl-sm border border-slate-200'
-                            }`}
+                            className={`px-3 py-2 md:px-4 md:py-2 rounded-2xl shadow-sm ${isOwn
+                              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-sm'
+                              : 'bg-white text-slate-800 rounded-bl-sm border border-slate-200'
+                              }`}
                           >
-                            <p className="text-sm break-words whitespace-pre-wrap">{msg.message}</p>
+                            <p className="text-xs md:text-sm break-words whitespace-pre-wrap">{msg.message}</p>
                           </div>
                           <div className={`flex items-center gap-1 mt-1 px-1 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
                             <span className="text-xs text-slate-400">
@@ -683,7 +690,7 @@ const UserAdminChat = () => {
                         </div>
 
                         {isOwn && (
-                          <Avatar className={`h-8 w-8 ${showAvatar ? 'opacity-100' : 'opacity-0'}`}>
+                          <Avatar className={`h-7 w-7 md:h-8 md:w-8 flex-shrink-0 ${showAvatar ? 'opacity-100' : 'opacity-0'}`}>
                             <AvatarImage src={currentUser?.image} />
                             <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-xs">
                               {currentUser?.firstName[0]}{currentUser?.lastName[0]}

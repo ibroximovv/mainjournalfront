@@ -11,6 +11,7 @@ import {
 
 import logo from "@/assets/rtu-logo.svg";
 import { Link } from "react-router-dom";
+import NavbarPartner from "./NavbarPartner";
 
 type NavLink = {
   name: string;
@@ -196,7 +197,8 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       </motion.div>
-    </nav>
+      <NavbarPartner />
+    </nav>    
   );
 };
 

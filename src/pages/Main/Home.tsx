@@ -2,10 +2,11 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, BookOpen, FileText, ArrowRight } from "lucide-react";
-import bg2 from "../../assets/images/bg-rtu2.jpg";
 import HomeTextCarusel from "@/components/HomeTextCarusel";
 import InformationHome from "@/modules/InformationHome";
 import LastJournal from "@/modules/LastJournal";
+import bg2Video from "../../assets/bg-video.mp4"
+import poster from "../../assets/images/poster.png"
 
 interface Journal {
   id: number;
@@ -40,7 +41,7 @@ const Home = () => {
         "https://backendjournal.ilyosbekibroximov.uz/api/journal?page=1&limit=1&sortBy=createdAt&sortOrder=desc"
       );
       const data = await response.json();
-      
+
       if (data.statusCode === 200 && data.data && data.data.length > 0) {
         setFeaturedJournal(data.data[0]);
       }
@@ -66,14 +67,20 @@ const Home = () => {
   return (
     <>
       <section className="relative w-full mx-auto overflow-hidden">
-        {/* Background image */}
+        {/* Background video */}
         <div className="w-full h-[600px]">
-          <img
-            src={bg2}
-            alt="RTU Journal background"
+          <video
+            src={bg2Video}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            poster={poster}
             className="w-full h-full object-cover brightness-[0.55]"
           />
         </div>
+
 
         {/* Overlay text */}
         <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center text-white">
